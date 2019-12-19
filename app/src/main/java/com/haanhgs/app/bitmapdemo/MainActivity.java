@@ -16,8 +16,8 @@ import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Point point = new Point();
-    private Paint paint = new Paint();
+    private final Point point = new Point();
+    private final Paint paint = new Paint();
     private Canvas canvas;
     private Bitmap bobBitmap;
     private float horizontal;
