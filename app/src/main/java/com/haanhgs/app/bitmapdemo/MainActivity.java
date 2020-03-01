@@ -1,6 +1,7 @@
 package com.haanhgs.app.bitmapdemo;
 
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -15,99 +16,100 @@ import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Point size = new Point();
+    private final Point point = new Point();
     private Paint paint = new Paint();
     private Canvas canvas;
-    private Bitmap background;
+    private Bitmap bitmapFill;
     private Bitmap bobBitmap;
+    private float textSize;
 
-    private float textPosY;
     private float horizon;
     private float vertical;
     private float horizonIncrement;
-    private float verticIncrement;
+    private float verticalIncrement;
 
-    private void hideActionBarAndStatusBar(){
+    private void setFullScreenAndPortrait(){
         if (getSupportActionBar() != null) getSupportActionBar().hide();
-            getWindow().setFlags(
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
-    private void getScreensize(){
+    private void getScreenSize(){
         Display display = getWindowManager().getDefaultDisplay();
-        display.getSize(size);
+        display.getSize(point);
     }
 
-    private void initContentView(){
-        background = Bitmap.createBitmap(size.x, size.y, Bitmap.Config.ARGB_8888);
+    private void createView(){
+        bitmapFill = Bitmap.createBitmap(point.x, point.y, Bitmap.Config.ARGB_8888);
         ImageView imageView = new ImageView(this);
-        imageView.setImageBitmap(background);
+        imageView.setImageBitmap(bitmapFill);
         setContentView(imageView);
     }
 
-    private void fillBackground(){
-        canvas = new Canvas(background);
+    private void fillView(){
+        canvas = new Canvas(bitmapFill);
         canvas.drawColor(Color.CYAN);
     }
 
     private void drawText(){
         paint.setFakeBoldText(true);
-        paint.setColor(Color.RED);
-        paint.setTextSize(size.x/10f);
-        String screensize = "" + size.x + " - " + size.y;
-        float width = paint.measureText(screensize);
-        textPosY = size.x/10f + 20;
-        canvas.drawText(screensize, size.x/2f - width/2, textPosY, paint);
+        paint.setColor(Color.BLACK);
+        textSize = point.y/20f;
+        paint.setTextSize(textSize);
+        String screenSize = point.x + " - " + point.y;
+        float width = paint.measureText(screenSize);
+        canvas.drawText(screenSize, point.x/2f - width/2, textSize*1.1f, paint);
     }
 
-    private void drawShrinkBob(){
-        bobBitmap = Bitmap.createScaledBitmap(bobBitmap, 30, 45, false);
-        canvas.drawBitmap(bobBitmap, size.x/2f - 15, textPosY + 10, paint);
+    private void createBobBitmap(){
+        bobBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bob);
     }
 
-    private void drawEnlargeBob(){
-        bobBitmap = Bitmap.createScaledBitmap(bobBitmap, 200, 300, false);
-        canvas.drawBitmap(
-                bobBitmap,
-                size.x/2f - 100,
-                textPosY + 75,
-                paint);
+    private void shrinkBob(){
+        Bitmap bitmap = Bitmap.createScaledBitmap(bobBitmap, 30, 45, false);
+        canvas.drawBitmap(bitmap, point.x/2f - 15, textSize*1.1f + 10, paint);
+    }
+
+    private void enlargeBob(){
+        Bitmap bitmap = Bitmap.createScaledBitmap(bobBitmap, 100, 150, false);
+        canvas.drawBitmap(bitmap, point.x/2f - 50, textSize*1.1f + 65, paint);
     }
 
     private void prepareRotateBob(){
         bobBitmap = Bitmap.createScaledBitmap(bobBitmap, 60, 90, false);
         horizon = 20;
-        vertical = size.y - 110;
-        horizonIncrement = (size.x - 100)/12f;
-        verticIncrement = (size.y - 100)/12f;
+        vertical = point.y - 100;
+        horizonIncrement = (point.x - 150)/12f;
+        verticalIncrement = (point.y - 100)/12f;
     }
 
-    private void drawRotateBob(){
-        prepareRotateBob();
+    private void rotateBob(){
         Matrix matrix = new Matrix();
-        for (float rotate = 0; rotate <= 360; rotate += 30){
+        for (float rotate = 0f; rotate <= 360; rotate += 30){
             matrix.reset();
             matrix.preRotate(rotate);
-            Bitmap bitmap = Bitmap.createBitmap(bobBitmap, 0, 0, bobBitmap.getWidth(),
-                    bobBitmap.getHeight(), matrix, true);
+            Bitmap bitmap = Bitmap.createBitmap(bobBitmap, 0, 0,
+                    bobBitmap.getWidth(), bobBitmap.getHeight(), matrix, true);
             canvas.drawBitmap(bitmap, horizon, vertical, paint);
             horizon += horizonIncrement;
-            vertical -= verticIncrement;
+            vertical -= verticalIncrement;
         }
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        hideActionBarAndStatusBar();
-        getScreensize();
-        initContentView();
-        fillBackground();
+        setFullScreenAndPortrait();
+        getScreenSize();
+        createView();
+        fillView();
         drawText();
-        bobBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bob);
-        drawShrinkBob();
-        drawEnlargeBob();
-        drawRotateBob();
+        createBobBitmap();
+        shrinkBob();
+        enlargeBob();
+        prepareRotateBob();
+        rotateBob();
     }
 }
