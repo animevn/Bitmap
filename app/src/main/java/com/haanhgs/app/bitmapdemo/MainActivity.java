@@ -14,6 +14,7 @@ import android.view.Display;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+//
 public class MainActivity extends AppCompatActivity {
 
     private final Point point = new Point();
